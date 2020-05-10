@@ -1,0 +1,149 @@
+Credits: https://medium.com/@sebagomez/installing-the-docker-client-on-ubuntus-windows-subsystem-for-linux-612b392a44c4
+
+Download oracle db 12.1.0.2 binaries and move them into folder of same name
+-------------------------------------------------------------------
+Update the apt package index:
+
+$ sudo apt-get update
+
+2. Install packages to allow apt to use a repository over HTTPS:
+
+$ sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+
+3. Add Docker’s official GPG key:
+
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+Verify that you now have the key with the fingerprint 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88, by searching for the last 8 characters of the fingerprint.
+
+$ sudo apt-key fingerprint 0EBFCD88
+
+pub 4096R/0EBFCD88 2017–02–22
+Key fingerprint = 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
+uid Docker Release (CE deb) <docker@docker.com>
+sub 4096R/F273FCD8 2017–02–22
+
+4. Use the following command to set up the stable repository. You always need the stable repository, even if you want to install builds from the edge or test repositories as well. To add the edge or test repository, add the word edge or test (or both) after the word stable in the commands below.
+
+$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+Now we're ready to install Docker Community Edition
+
+5. Update the apt package index again
+
+$ sudo apt-get update
+
+6. And install Docker CE
+
+$ sudo apt-get install docker-ce
+
+When that finishes, you'll end up having everything installed in Linux, but as I mentioned before, the Docker Engine does not run in WSL so if you write any command like docker images, you'll see a message like this one:
+
+    Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+
+No, it is not running and it'll never be, at least for now.
+
+You need to tell the Docker client where the Docker host is, and you can do that by using the -H option as follows:
+
+$ docker -H localhost:2375 images
+
+If you don't want to type the host every time, you can set up and environment variable called DOCKER_HOST to localhost:2375
+
+$ export DOCKER_HOST=localhost:2375
+
+Now just running docker images will show the images in your host environment.
+
+But, that environment variable will last only as long as the session does. You would have to set it every time you open bash. So, in order to avoid that, you set that variable in a file called .bash_profile in your home directory, like this:
+
+$ echo "export DOCKER_HOST=localhost:2375" >> ~/.bash_profile
+
+Restart the bash console and the DOCKER_HOST variable should be there, just type docker images to check everything is there.
+
+I hope this post will help other, if it does, let me know.
+
+EDIT: Make sure you expose the daemon on Windows, otherwise it won't work.
+
+----------------------------------------------------------
+
+Install database docker using guide
+
+https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md
+
+
+On the first startup of the container a random password will be generated for the database if not provided. You can find this password in the output line:
+
+ORACLE PASSWORD FOR SYS AND SYSTEM:  xxxxxxxxxxxxxxx
+
+Save it, you can change it later
+
+----------------------------------------------------------
+change docker name: 
+
+* check container name:
+    docker container ls -a
+
+* rename docker :
+    docker rename <default name> <new name>
+
+----------------------------------------------------------
+create network bridge for static ip address communication between container and host
+
+#https://nickjanetakis.com/blog/docker-tip-35-connect-to-a-database-running-on-your-docker-host
+
+docker network create --subnet 172.20.0.0/16 --ip-range 172.20.240.0/20 db_network
+
+docker network create -d bridge --subnet 192.168.0.0/24 --gateway 192.168.0.1 mynet
+-----------------------------------------------------------
+change network from container
+
+#https://docs.docker.com/config/containers/container-networking/
+
+* check networks :
+    docker network ls
+
+* run command
+docker network connect [OPTIONS] <NETWORK> <CONTAINER>
+
+********* specify ip
+
+
+docker network connect --ip 172.20.128.2 db_network oracle_db
+
+docker network connect --ip 192.168.128.2 mynet oracle_db
+
+-----------------------------------------------------------
+connect to docker database
+
+https://nickjanetakis.com/blog/docker-tip-35-connect-to-a-database-running-on-your-docker-host
+
+Find Your Local (DOCKER) Network IP Address on MacOS / Linux:
+    *if 'ifconfig' is unavailable you can also use 'ip a'
+    (ex: 172.17.67.225)
+
+Find Your Local Network IP Address on Windows
+    *ipconfig   (ex: 192.168.15.1)
+
+
+****** or create custom bridge in docker network
+
+
+-----------------------------------------------------------------------------
+
+
+***********************************************************************
+
+docker run -p 1521:1521 --name oracle_db --network mynet -d  oracle/database:12.1.0.2-ee
+
+
+----
+#https://www.youtube.com/watch?v=ciYsDbBx80s
+
+pass 5+6U0KRtvMY=1
+
+sqlplus system/5+6U0KRtvMY=1@//localhost:1521/ORCLCDB
+
+alter session set "_ORACLE_SCRIPT"=true;
+
+create user santos identified by santos
+
+GRANT ALL PRIVILEGES TO santos;
