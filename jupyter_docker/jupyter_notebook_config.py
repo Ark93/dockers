@@ -278,7 +278,7 @@ c.NotebookApp.keyfile = '/home/jovyan/mykey.key'
 #    from notebook.auth import passwd; passwd()
 #  
 #  The string should be of the form type:salt:hashed-password.
-c.NotebookApp.password = u'sha1:24cb7fc768f5:ec53d7895dd9cd79338b04b2772a36dffb028db9'
+c.NotebookApp.password = u'sha1:aef0e67455d7:53fad7f0d9420583cee47e5d18fb8e9d36deebd8'
 
 ## Forces users to use a password for the Notebook server. This is useful in a
 #  multi user environment, for instance when everybody in the LAN can access each
