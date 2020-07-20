@@ -48,4 +48,3 @@ except Exception as e:
     print('Error: {}'.format(str(e)))
     logging.error('Service stoped')
     logging.error(e)
-    

@@ -6,7 +6,7 @@ COPY requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY scripts/config.py /var/lib/service_py/config.py
+COPY scripts/config.py ./ 
 COPY scripts/yahoo_service.py ./
 
-#CMD [ "python", "yahoo_service.py" ]
+CMD [ "python", "yahoo_service.py" ]
